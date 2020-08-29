@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Project, Pledge
+from django.utils import timezone
 
 class ProjectSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
@@ -11,20 +12,26 @@ class ProjectSerializer(serializers.Serializer):
     date_created = serializers.DateTimeField()
     # owner = serializers.CharField(max_length=200)
     owner = serializers.ReadOnlyField(source='owner.username')
-    # category  = serializers.SerializerMethodField(source='category')
-    # vehicle_category = serializers.SerializerMethodField()
+    category  = serializers.ChoiceField(choices=Project.CATEGORY_CHOICES)
+    vehicle_category = serializers.ChoiceField(choices=Project.VehicleType_CHOICES)
     
-    # class Meta:
-    #     model = Project
+    def create(self, validated_data):
+        return Project.objects.create(**validated_data)
+
+    class Meta:
+        model = Project
     
     # def get_category(self,obj):
     #     return obj.get_category_display()
 
     # def get_vehicle_category(self,obj):
     #     return obj.get_vehicle_category_display()
+        
+class CategoryProjectSerializer(serializers.Serializer):
+    project_categories = ProjectSerializer(many=True, read_only=True)
+
+
     
-    def create(self, validated_data):
-        return Project.objects.create(**validated_data)
 
 class PledgeSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
@@ -34,7 +41,7 @@ class PledgeSerializer(serializers.Serializer):
     # supporter = serializers.CharField(max_length=200)
     supporter = serializers.ReadOnlyField(source='supporter.username')
     project_id = serializers.IntegerField()
-    
+
     def create(self, validated_data):
         return Pledge.objects.create(**validated_data)
     
@@ -59,7 +66,7 @@ class ProjectDetailSerializer(ProjectSerializer):
         instance.is_open = validated_data.get('is_open', instance.is_open)
         instance.date_created = validated_data.get('date_created', instance.date_created)
         instance.owner = validated_data.get('owner', instance.owner)
-        # instance.category = validated_data.get('category', instance.category)
-        # instance.vehicle_category = validated_data.get('vehicle_category', instance.vehicle_category)
+        instance.category = validated_data.get('category', instance.category)
+        instance.vehicle_category = validated_data.get('vehicle_category', instance.vehicle_category)
         instance.save()
         return instance

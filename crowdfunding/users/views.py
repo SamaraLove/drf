@@ -4,8 +4,11 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from .models import CustomUser
 from .serializers import CustomUserSerializer
+# from .permissions import IsOwnerOrReadOnly
+
 
 class CustomUserList(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         users = CustomUser.objects.all()
@@ -15,7 +18,7 @@ class CustomUserList(APIView):
     def post(self, request):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(username=request.user)
             return Response(serializer.data)
         return Response(serializer.errors)
 

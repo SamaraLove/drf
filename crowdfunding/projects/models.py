@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
+from datetime import datetime    
+
 
 # Create your models here.
 class Project(models.Model):
@@ -8,7 +11,10 @@ class Project(models.Model):
     goal = models.IntegerField()
     image = models.URLField()
     is_open = models.BooleanField()
-    date_created = models.DateTimeField()
+    date_created = models.DateTimeField(auto_now_add=True,editable=False)
+    # date_created = models.DateTimeField(default=datetime.now,blank=True)
+
+    # date_created = models.DateTimeField(default=now, editable=False)
     # owner = models.CharField(max_length=200)
     owner = models.ForeignKey(
         get_user_model(),
@@ -24,7 +30,6 @@ class Project(models.Model):
     # ('No Category Assigned', 'No Category Assigned'),
     )
     category = models.CharField(max_length=60, blank=True, default='No Category Assigned',choices=CATEGORY_CHOICES,verbose_name="category")
-    
     VehicleType_CHOICES = (
     ('4WD', '4WD'),
     ('Custom', 'Custom'),

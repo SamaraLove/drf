@@ -1,16 +1,14 @@
 from django.http import Http404
-from rest_framework import status, permissions
+from rest_framework import status, permissions,generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 # from rest_framework import status
 from .models import Project, Pledge
-from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer
+from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, CategoryProjectSerializer
 from .permissions import IsOwnerOrReadOnly
 
 class ProjectList(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    # queryset = Project.objects.all()
-    # serializer_class = ProjectSerializer
 
     def get(self, request):
         projects = Project.objects.all()
@@ -32,8 +30,49 @@ class ProjectList(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+# class CategoryList(generics.RetrieveAPIView):
+#     def get_queryset(self):
+#         return Project.objects.all()  
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['Project'] = Project.objects.all().order_by('category')
+#         return context
+
+class CategoryProject(generics.RetrieveAPIView):
+    # queryset = Project.objects.all()
+    # serializer_class = CategoryProjectSerializer
+    # lookup_field = 'category'
+    # queryset = request.GET.get("category")
+    serializer_class = CategoryProjectSerializer
+    lookup_field = 'category'
+
+    def get_queryset(self):
+        '''Return all projects.'''
+        qs = Project.objects.all()   
+        q = self.request.GET.get("category")
+        if q: 
+            qs = qs.filter(category=q)
+        return qs
+    
+# http://localhost:8000/news/filter/?cuisine_type=American
+# class Category(APIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#     queryset = Project.objects.all()
+#     serializer_class = ProjectSerializer
+
+#     def get_object(self, pk):
+#         try:
+#             return Project.objects.get(pk=pk)
+#         except Project.DoesNotExist:
+#             raise Http404
+
+
 class ProjectDetail(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
+    queryset = Project.objects.all()
+    serializer_class = ProjectDetailSerializer
+
 
     def get_object(self, pk):
         try:
