@@ -3,6 +3,11 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from datetime import datetime    
 
+class Category(models.Model):
+    category = models.CharField(max_length=100,unique=True)
+
+    def __str__(self):
+        return self.catergory
 
 # Create your models here.
 class Project(models.Model):
@@ -21,23 +26,30 @@ class Project(models.Model):
         on_delete=models.CASCADE,
         related_name='owner_projects'
     )
-    CATEGORY_CHOICES = (
-    ('Suspension', 'Suspension'),
-    ('Driveline', 'Driveline'),
-    ('Body', 'Body'),
-    ('Acessories', 'Acessories'),
-    ('Race', 'Race'),
-    # ('No Category Assigned', 'No Category Assigned'),
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        related_name='project_categories'
     )
-    category = models.CharField(max_length=60, blank=True, default='No Category Assigned',choices=CATEGORY_CHOICES,verbose_name="category")
-    VehicleType_CHOICES = (
-    ('4WD', '4WD'),
-    ('Custom', 'Custom'),
-    ('Toyota', 'Toyota'),
-    ('Sprint', 'Sprint'),
-    # ('No Category Assigned', 'No Category Assigned'),
-    )
-    vehicle_category = models.CharField(max_length=60, blank=True, default='No Category Assigned',choices=VehicleType_CHOICES,verbose_name="vehicle_category")
+    # CATEGORY_CHOICES = (
+    # ('Suspension', 'Suspension'),
+    # ('Driveline', 'Driveline'),
+    # ('Body', 'Body'),
+    # ('Acessories', 'Acessories'),
+    # ('Race', 'Race'),
+    # # ('No Category Assigned', 'No Category Assigned'),
+    # )
+    # category = models.CharField(max_length=60, blank=True, default='No Category Assigned',choices=CATEGORY_CHOICES,verbose_name="category")
+    # VehicleType_CHOICES = (
+    # ('4WD', '4WD'),
+    # ('Custom', 'Custom'),
+    # ('Toyota', 'Toyota'),
+    # ('Sprint', 'Sprint'),
+    # # ('No Category Assigned', 'No Category Assigned'),
+    # )
+    # vehicle_category = models.CharField(max_length=60, blank=True, default='No Category Assigned',choices=VehicleType_CHOICES,verbose_name="vehicle_category")
+
+
 
 
 class Pledge(models.Model):

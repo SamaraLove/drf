@@ -1,6 +1,17 @@
 from rest_framework import serializers
-from .models import Project, Pledge
+from .models import Project, Pledge, Category
 from django.utils import timezone
+
+class CategorySerializer(serializers.Serializer):
+    # queryset = Project.objects.all()
+    # serializer_class = CategoryProjectSerializer
+    # lookup_field = 'category'
+    # queryset = request.GET.get("category")
+    category = serializers.CharField(max_length=100)
+    lookup_field = 'category'
+        
+    def create(self, validated_data):
+        return Category.objects.create(**validated_data)
 
 class ProjectSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
@@ -12,14 +23,17 @@ class ProjectSerializer(serializers.Serializer):
     date_created = serializers.DateTimeField()
     # owner = serializers.CharField(max_length=200)
     owner = serializers.ReadOnlyField(source='owner.username')
-    category  = serializers.ChoiceField(choices=Project.CATEGORY_CHOICES)
-    vehicle_category = serializers.ChoiceField(choices=Project.VehicleType_CHOICES)
+    # category  = serializers.ChoiceField(choices=Project.CATEGORY_CHOICES)
+    # vehicle_category = serializers.ChoiceField(choices=Project.VehicleType_CHOICES)
+    category = serializers.SlugRelatedField(queryset = Category.objects.all(), read_only = False, slug_field='category')
+    # vehicle_category = serializers.SlugRelatedField(queryset = Category.objects.all(), read_only = False, slug_field='vehicle_category')
+
     
     def create(self, validated_data):
         return Project.objects.create(**validated_data)
 
-    class Meta:
-        model = Project
+    # class Meta:
+    #     model = Project
     
     # def get_category(self,obj):
     #     return obj.get_category_display()
@@ -27,7 +41,9 @@ class ProjectSerializer(serializers.Serializer):
     # def get_vehicle_category(self,obj):
     #     return obj.get_vehicle_category_display()
         
-class CategoryProjectSerializer(serializers.Serializer):
+
+
+class CategoryProjectSerializer(CategorySerializer):
     project_categories = ProjectSerializer(many=True, read_only=True)
 
 

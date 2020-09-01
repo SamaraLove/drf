@@ -8,7 +8,6 @@ from .serializers import CustomUserSerializer
 
 
 class CustomUserList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         users = CustomUser.objects.all()
@@ -23,7 +22,7 @@ class CustomUserList(APIView):
         return Response(serializer.errors)
 
 class CustomUserDetail(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -39,7 +38,7 @@ class CustomUserDetail(APIView):
 
     def put(self, request, pk):
         user = self.get_object(pk)
-        self.check_object_permissions(request, user)
+        # self.check_object_permissions(request, user)
         data = request.data
         serializer = CustomUserSerializer(
             instance=user,
@@ -59,7 +58,7 @@ class CustomUserDetail(APIView):
     
     def delete(self, request, pk):
         user = self.get_object(pk)
-        self.check_object_permissions(request, user)
+        # self.check_object_permissions(request, user)
 
         try:
             user.delete()

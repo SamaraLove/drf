@@ -3,9 +3,31 @@ from rest_framework import status, permissions,generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 # from rest_framework import status
-from .models import Project, Pledge
-from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, CategoryProjectSerializer
-from .permissions import IsOwnerOrReadOnly
+from .models import Project, Pledge, Category
+from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, CategoryProjectSerializer, CategorySerializer
+from .permissions import IsOwnerOrReadOnly, isSuperUser
+
+class CategoryList(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,isSuperUser]
+
+
+    def get(self, request):
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data)
+        
+    def post(self, request):
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+                )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+            )
 
 class ProjectList(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -30,9 +52,10 @@ class ProjectList(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-# class CategoryList(generics.RetrieveAPIView):
-#     def get_queryset(self):
-#         return Project.objects.all()  
+
+
+    # def get_queryset(self):
+    #     return Project.objects.all()  
 
 #     def get_context_data(self, **kwargs):
 #         context = super().get_context_data(**kwargs)
@@ -44,18 +67,21 @@ class CategoryProject(generics.RetrieveAPIView):
     # serializer_class = CategoryProjectSerializer
     # lookup_field = 'category'
     # queryset = request.GET.get("category")
+    queryset = Category.objects.all()
     serializer_class = CategoryProjectSerializer
     lookup_field = 'category'
 
-    def get_queryset(self):
-        '''Return all projects.'''
-        qs = Project.objects.all()   
-        q = self.request.GET.get("category")
-        if q: 
-            qs = qs.filter(category=q)
-        return qs
+    # def get_queryset(self):
+    #     '''Return all projects.'''
+    #     qs = Project.objects.all()   
+    #     q = self.request.GET.get("category")
+    #     if q: 
+    #         qs = qs.filter(category=q)
+    #     return qs
     
 # http://localhost:8000/news/filter/?cuisine_type=American
+
+
 # class Category(APIView):
 #     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 #     queryset = Project.objects.all()
@@ -72,7 +98,6 @@ class ProjectDetail(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
     queryset = Project.objects.all()
     serializer_class = ProjectDetailSerializer
-
 
     def get_object(self, pk):
         try:
@@ -181,22 +206,3 @@ class PledgeDetail(APIView):
             return Response(status = status.HTTP_204_NO_CONTENT)
         except Pledge.DoesNotExist:
             raise Http404
-
-# class Statistics(APIView):
-
-
-# class StoryFilterView(APIView):
-
-#     def get_queryset(self):
-#         '''Return all news stories.'''
-#         qs = NewsStory.objects.all()   
-#         q = self.request.GET.get("category")
-#         if q: 
-#             qs = qs.filter(category=q)
-#         return qs
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['form'] = StoryForm
-#         print(context)
-#         return context
