@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status, permissions, generics, viewsets
 from .models import CustomUser, Profile
 from .serializers import CustomUserSerializer, ProfileSerializer
-from .permissions import IsOwnerOrReadOnly, isSuperUser
+from .permissions import IsOwnerOrReadOnly
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 
@@ -55,7 +55,7 @@ class CustomUserList(APIView):
         return Response(serializer.errors)
 
 class CustomUserDetail(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly, isSuperUser]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -71,7 +71,7 @@ class CustomUserDetail(APIView):
 
     def put(self, request, pk):
         user = self.get_object(pk)
-        self.check_object_permissions(request, user)
+        # self.check_object_permissions(request, user)
         data = request.data
         serializer = CustomUserSerializer(
             instance=user,
@@ -91,7 +91,7 @@ class CustomUserDetail(APIView):
     
     def delete(self, request, pk):
         user = self.get_object(pk)
-        self.check_object_permissions(request, user)
+        # self.check_object_permissions(request, user)
 
         try:
             user.delete()

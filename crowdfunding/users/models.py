@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 
 
 class CustomUser(AbstractUser):
@@ -13,21 +13,23 @@ class CustomUser(AbstractUser):
 
 
 
-# class Profile(models.Model):
-#     rating = models.IntegerField(blank=True)
-#     created = models.DateTimeField(auto_now_add=True)
-#     updated = models.DateTimeField(auto_now=True)
-#     user = models.OneToOneField(
-#         CustomUser,
-#         on_delete=models.CASCADE,
-#         primary_key=True,
-#         related_name="userprofile"
-#     )
+class Profile(models.Model):
+    rating = models.IntegerField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        related_name="userprofile"
+    )
 
 
-    def save_profile(sender, instance, **kwargs):
-        instance.profile.save()
-    post_save.connect(save_post, sender=CustomUser)
+    # def save_profile(sender, instance, **kwargs):
+    #     instance.profile.save()
+    
+    # pre_save.connect(save_profile, sender=CustomUser)
+    # post_save.connect(save_profile, sender=CustomUser)
 
 # class Post(models.Model):
     
