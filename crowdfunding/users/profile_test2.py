@@ -39,6 +39,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
         new_user = CustomUser.objects.create(**validated_data)
         Profile.objects.create(new_user=user, **userprofile_data)
         return new_user
+
+
+
         # return CustomUser.objects.create(**validated_data)
 
     # def update(self, instance, validated_data):

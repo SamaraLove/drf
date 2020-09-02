@@ -13,16 +13,16 @@ class CustomUser(AbstractUser):
 
 
 
-# class Profile(models.Model):
-#     rating = models.IntegerField(blank=True)
-#     created = models.DateTimeField(auto_now_add=True)
-#     updated = models.DateTimeField(auto_now=True)
-#     user = models.OneToOneField(
-#         CustomUser,
-#         on_delete=models.CASCADE,
-#         primary_key=True,
-#         related_name="userprofile"
-#     )
+class Profile(models.Model):
+    rating = models.IntegerField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        related_name="userprofile"
+    )
 
 
     def save_profile(sender, instance, **kwargs):
