@@ -25,9 +25,9 @@ class Profile(models.Model):
     )
 
 
-    def save_profile(sender, instance, **kwargs):
-        instance.profile.save()
-    post_save.connect(save_post, sender=CustomUser)
+    # def save_profile(sender, instance, **kwargs):
+    #     instance.profile.save()
+    # post_save.connect(save_post, sender=CustomUser)
 
 # class Post(models.Model):
     
