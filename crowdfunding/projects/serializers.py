@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Project, Pledge, Category
 from django.utils import timezone
+# from django.db.models import Sum
 
 class CategorySerializer(serializers.Serializer):
     # queryset = Project.objects.all()
@@ -27,11 +28,40 @@ class ProjectSerializer(serializers.Serializer):
     # vehicle_category = serializers.ChoiceField(choices=Project.VehicleType_CHOICES)
     category = serializers.SlugRelatedField(queryset = Category.objects.all(), read_only = False, slug_field='category')
     # vehicle_category = serializers.SlugRelatedField(queryset = Category.objects.all(), read_only = False, slug_field='vehicle_category')
+    pledge_total = serializers.SerializerMethodField(read_only=True)
+    no_of_pledges = serializers.SerializerMethodField(read_only=True)
+    biggest_contributor= serializers.SerializerMethodField(read_only=True)
+    # last_update_at = serializers.DateTimeField(auto_now=True,editable=False)
+    # is_backing = serializers.BooleanField()
 
-    
     def create(self, validated_data):
         return Project.objects.create(**validated_data)
 
+    def get_pledge_total(self, obj):
+        queryset = Pledge.objects.all()
+        total = 0
+        for instance in queryset:
+            total += instance.amount
+        return total
+    
+    def get_no_of_pledges(self, obj):
+        queryset = Pledge.objects.all()
+        total = 0
+        for instance in queryset:
+            total += instance.amount
+            # print (total)
+        return total
+    
+    def get_biggest_contributor(self,obj):
+        queryset = Pledge.objects.all()
+        amount = 0
+        for instance in queryset:
+            if amount > instance.amount or amount == instance.amount:
+                amount = amount
+            else: 
+                amount = instance.amount
+                # name = instance.supporter
+        return amount
     # class Meta:
     #     model = Project
     
@@ -45,9 +75,6 @@ class ProjectSerializer(serializers.Serializer):
 
 class CategoryProjectSerializer(CategorySerializer):
     project_categories = ProjectSerializer(many=True, read_only=True)
-
-
-    
 
 class PledgeSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
@@ -83,6 +110,6 @@ class ProjectDetailSerializer(ProjectSerializer):
         instance.date_created = validated_data.get('date_created', instance.date_created)
         instance.owner = validated_data.get('owner', instance.owner)
         instance.category = validated_data.get('category', instance.category)
-        instance.vehicle_category = validated_data.get('vehicle_category', instance.vehicle_category)
+        # instance.vehicle_category = validated_data.get('vehicle_category', instance.vehicle_category)
         instance.save()
         return instance

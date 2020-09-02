@@ -8,7 +8,7 @@ from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSeria
 from .permissions import IsOwnerOrReadOnly, isSuperUser
 
 class CategoryList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,isSuperUser]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, isSuperUser]
 
 
     def get(self, request):
@@ -39,7 +39,6 @@ class ProjectList(APIView):
 
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
-        # self.check_object_permissions(request, project)
 
         if serializer.is_valid():
             serializer.save(owner=request.user)
@@ -52,6 +51,21 @@ class ProjectList(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+class ProjectListAuthor(generics.ListAPIView):
+    serializer_class = ProjectSerializer
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = Project.objects.all()
+        username = self.request.query_params.get('username', None)
+        category = self.request.query_params.get('category', None)
+        if username is not None:
+            queryset = queryset.filter(owner__username=username)
+        if category is not None:
+            queryset = queryset.filter(category=category)
+        return queryset
 
 
     # def get_queryset(self):
@@ -63,6 +77,8 @@ class ProjectList(APIView):
 #         return context
 
 class CategoryProject(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, isSuperUser]
+    
     # queryset = Project.objects.all()
     # serializer_class = CategoryProjectSerializer
     # lookup_field = 'category'
@@ -95,7 +111,7 @@ class CategoryProject(generics.RetrieveAPIView):
 
 
 class ProjectDetail(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     queryset = Project.objects.all()
     serializer_class = ProjectDetailSerializer
 
@@ -150,7 +166,6 @@ class PledgeList(APIView):
     
     def post(self, request):
         serializer = PledgeSerializer(data=request.data)
-        # self.check_object_permissions(request, serializer)
 
         if serializer.is_valid():
             serializer.save(supporter=request.user)
