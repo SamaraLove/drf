@@ -4,43 +4,12 @@ from rest_framework.response import Response
 from rest_framework import status, permissions, generics, viewsets
 from .models import CustomUser, Profile
 from .serializers import CustomUserSerializer, ProfileSerializer
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, isSuperUser
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import PermissionDenied
-
-# https://stackoverflow.com/questions/55913920/django-rest-framework-displaying-the-users-profile
-
-# class Profile(APIView):
-#     # serializer_class = ProfileSerializer
-
-#     def get(self, request, *args, **kwargs):
-#         user = get_object_or_404(CustomUser, pk=kwargs['user_id'])
-#         print (user)
-#         # print (user.userprofile)
-
-#         profile_serializer = ProfileSerializer(user.userprofile)
-#         return Response(profile_serializer.data)
-    
-    # def get_object(self, pk):
-    #     try:
-    #         return Projects.objects.get(pk=pk)
-    #     except Projects.DoesNotExist:
-    #         raise Http404
-    
-
-    # def get_queryset(self):
-    #     return Profile.objects.filter(user=self.kwargs['user_id'])
-
-    # def get_queryset(self):
-    #     """
-    #     This view should return a list of all the purchases
-    #     for the currently authenticated user.
-    #     """
-    #     user = self.request.user
-    #     return Projects.objects.filter(owner__username=user)
+from django.core.exceptions import PermissionDenied 
 
 class CustomUserList(APIView):
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         users = CustomUser.objects.all()
@@ -55,7 +24,8 @@ class CustomUserList(APIView):
         return Response(serializer.errors)
 
 class CustomUserDetail(APIView):
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly,isSuperUser]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -68,10 +38,9 @@ class CustomUserDetail(APIView):
         serializer = CustomUserSerializer(user)
         return Response(serializer.data)
 
-
     def put(self, request, pk):
         user = self.get_object(pk)
-        # self.check_object_permissions(request, user)
+        self.check_object_permissions(request, user)
         data = request.data
         serializer = CustomUserSerializer(
             instance=user,
@@ -91,19 +60,10 @@ class CustomUserDetail(APIView):
     
     def delete(self, request, pk):
         user = self.get_object(pk)
-        # self.check_object_permissions(request, user)
+        self.check_object_permissions(request, user)
 
         try:
             user.delete()
             return Response(status = status.HTTP_204_NO_CONTENT)
         except CustomUser.DoesNotExist:
             raise Http404
-# raise PermissionDenied()
-
-
-
-# class Profile(viewsets.ViewSet):
-#     def get(self, request, *args, **kwargs):
-#         user = get_object_or_404(CustomUser, pk=kwargs['user_id'])
-#         profile_serializer = ProfileSerializer(user.profile)
-#         return Response(profile_serializer.data)

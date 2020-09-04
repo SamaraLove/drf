@@ -4,11 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 # from rest_framework import status
 from .models import Project, Pledge, Category
-from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, CategoryProjectSerializer, CategorySerializer
+from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, CategoryProjectSerializer, CategorySerializer, ProjectTotalSerializer
 from .permissions import IsOwnerOrReadOnly, isSuperUser
 
 class CategoryList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, isSuperUser]
+    permission_classes = [isSuperUser]
 
 
     def get(self, request):
@@ -18,8 +18,10 @@ class CategoryList(APIView):
         
     def post(self, request):
         serializer = CategorySerializer(data=request.data)
+
         if serializer.is_valid():
-            serializer.save()
+            print(request.user.is_superuser)
+            serializer.save(request.user.is_superuser)
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED
@@ -77,7 +79,7 @@ class ProjectListAuthor(generics.ListAPIView):
 #         return context
 
 class CategoryProject(generics.RetrieveAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, isSuperUser]
+    permission_classes = [isSuperUser]
     
     # queryset = Project.objects.all()
     # serializer_class = CategoryProjectSerializer
@@ -221,3 +223,12 @@ class PledgeDetail(APIView):
             return Response(status = status.HTTP_204_NO_CONTENT)
         except Pledge.DoesNotExist:
             raise Http404
+
+
+class ProjectTotals(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        projects = Project.objects.all()
+        serializer = ProjectTotalSerializer(projects, many=True)
+        return Response(serializer.data)

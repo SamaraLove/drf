@@ -10,6 +10,8 @@ urlpatterns = [
     path('categories/', views.CategoryList.as_view()),
     path('categories/<str:category>', views.CategoryProject.as_view()),
     path('authors/', views.ProjectListAuthor.as_view()),
+    path('projects/total', views.ProjectTotals.as_view()),
+
     # path('authors/(?P<category>.+)/$', views.ProjectListAuthor.as_view()),
 
 ]

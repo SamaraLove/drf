@@ -22,46 +22,28 @@ class ProjectSerializer(serializers.Serializer):
     image = serializers.URLField()
     is_open = serializers.BooleanField()
     date_created = serializers.DateTimeField()
+    company = serializers.CharField(required=False,max_length=100)
+    deadline = serializers.DateField()
     # owner = serializers.CharField(max_length=200)
     owner = serializers.ReadOnlyField(source='owner.username')
-    # category  = serializers.ChoiceField(choices=Project.CATEGORY_CHOICES)
-    # vehicle_category = serializers.ChoiceField(choices=Project.VehicleType_CHOICES)
+
     category = serializers.SlugRelatedField(queryset = Category.objects.all(), read_only = False, slug_field='category')
     # vehicle_category = serializers.SlugRelatedField(queryset = Category.objects.all(), read_only = False, slug_field='vehicle_category')
-    pledge_total = serializers.SerializerMethodField(read_only=True)
-    no_of_pledges = serializers.SerializerMethodField(read_only=True)
-    biggest_contributor= serializers.SerializerMethodField(read_only=True)
-    # last_update_at = serializers.DateTimeField(auto_now=True,editable=False)
+
+    last_update_at = serializers.DateTimeField()
     # is_backing = serializers.BooleanField()
 
     def create(self, validated_data):
         return Project.objects.create(**validated_data)
 
-    def get_pledge_total(self, obj):
-        queryset = Pledge.objects.all()
-        total = 0
-        for instance in queryset:
-            total += instance.amount
-        return total
-    
-    def get_no_of_pledges(self, obj):
-        queryset = Pledge.objects.all()
-        total = 0
-        for instance in queryset:
-            total += instance.amount
-            # print (total)
-        return total
-    
-    def get_biggest_contributor(self,obj):
-        queryset = Pledge.objects.all()
-        amount = 0
-        for instance in queryset:
-            if amount > instance.amount or amount == instance.amount:
-                amount = amount
-            else: 
-                amount = instance.amount
-                # name = instance.supporter
-        return amount
+    # def get_progress_goal(self,obj):
+    #     queryset = Pledge.objects.all()
+    #     total = 0
+    #     for instance in queryset:
+    #         total += instance.amount
+    #     return total
+
+
     # class Meta:
     #     model = Project
     
@@ -98,7 +80,14 @@ class PledgeSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-class ProjectDetailSerializer(ProjectSerializer):
+
+
+class ProjectDetailSerializer(ProjectSerializer):    
+    pledge_total = serializers.SerializerMethodField(read_only=True)
+
+    no_of_pledges = serializers.SerializerMethodField(read_only=True)
+    biggest_contribution = serializers.SerializerMethodField(read_only=True)
+    
     pledges = PledgeSerializer(many=True, read_only=True)
 
     def update(self, instance, validated_data):
@@ -113,3 +102,64 @@ class ProjectDetailSerializer(ProjectSerializer):
         # instance.vehicle_category = validated_data.get('vehicle_category', instance.vehicle_category)
         instance.save()
         return instance
+    
+    def get_pledge_total(self, obj):
+        queryset = Pledge.objects.filter(project = obj.id)        
+        total = 0
+        for instance in queryset:
+            total += instance.amount
+        return total
+    
+    def get_no_of_pledges(self, obj):
+        queryset = Pledge.objects.filter(project = obj.id)        
+        total = 0
+        for instance in queryset:
+            total += instance.amount
+            # print (total)
+        return total
+
+    def get_biggest_contribution(self,obj):
+        queryset = Pledge.objects.filter(project = obj.id)        
+        amount = 0
+        for instance in queryset:
+            if amount > instance.amount or amount == instance.amount:
+                amount = amount
+                # name = instance.supporter
+            else: 
+                amount = instance.amount
+                # print(amount)
+                # name = instance.supporter
+                # print(name)
+        return amount
+
+class ProjectTotalSerializer(ProjectSerializer):
+    pledge_total = serializers.SerializerMethodField(read_only=True)
+    no_of_pledges = serializers.SerializerMethodField(read_only=True)
+    biggest_contributor= serializers.SerializerMethodField(read_only=True)
+
+    def get_pledge_total(self, obj):
+        queryset = Pledge.objects.all()
+        queryset = Pledge.objects.filter(project = obj.id)   
+        total = 0
+        for instance in queryset:
+            total += instance.amount
+        return total
+    
+    def get_no_of_pledges(self, obj):
+        queryset = Pledge.objects.all(project = obj.id)
+        total = 0
+        for instance in queryset:
+            total += instance.amount
+            # print (total)
+        return total
+    
+    def get_biggest_contributor(self,obj):
+        queryset = Pledge.objects.all(project = obj.id)
+        amount = 0
+        for instance in queryset:
+            if amount > instance.amount or amount == instance.amount:
+                amount = amount
+            else: 
+                amount = instance.amount
+                # name = instance.supporter
+        return amount

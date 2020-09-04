@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
-from datetime import datetime    
+from datetime import datetime, timedelta    
+
 
 class Category(models.Model):
     category = models.CharField(max_length=100,unique=True)
@@ -9,7 +10,9 @@ class Category(models.Model):
     def __str__(self):
         return self.catergory
 
-# Create your models here.
+def get_deadline():
+    return datetime.today() + timedelta(days=20)
+
 class Project(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -17,9 +20,10 @@ class Project(models.Model):
     image = models.URLField()
     is_open = models.BooleanField()
     date_created = models.DateTimeField(auto_now_add=True,editable=False)
-    # date_created = models.DateTimeField(default=datetime.now,blank=True)
-
-    # date_created = models.DateTimeField(default=now, editable=False)
+    last_update_at = models.DateTimeField(auto_now=True,blank=True)
+    deadline = models.DateField(default=get_deadline)
+    company = models.TextField(default = "")
+    
     # owner = models.CharField(max_length=200)
     owner = models.ForeignKey(
         get_user_model(),
