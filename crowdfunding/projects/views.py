@@ -1,15 +1,13 @@
 from django.http import Http404
-from rest_framework import status, permissions,generics
+from rest_framework import status, permissions, generics, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
-# from rest_framework import status
 from .models import Project, Pledge, Category
 from .serializers import ProjectSerializer, PledgeSerializer, ProjectDetailSerializer, CategoryProjectSerializer, CategorySerializer, ProjectTotalSerializer
 from .permissions import IsOwnerOrReadOnly, isSuperUser
 
 class CategoryList(APIView):
-    permission_classes = [isSuperUser]
-
+    permission_classes = [isSuperUser,permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         categories = Category.objects.all()
@@ -18,17 +16,20 @@ class CategoryList(APIView):
         
     def post(self, request):
         serializer = CategorySerializer(data=request.data)
-
+       
         if serializer.is_valid():
             print(request.user.is_superuser)
-            serializer.save(request.user.is_superuser)
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-                )
+
+            if (request.user.is_superuser):
+
+                serializer.save()
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                    )
         return Response(
             serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_401_UNAUTHORIZED
             )
 
 class ProjectList(APIView):
@@ -53,64 +54,28 @@ class ProjectList(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-class ProjectListAuthor(generics.ListAPIView):
+class FilterView(generics.ListAPIView):
     serializer_class = ProjectSerializer
-    def get_queryset(self):
-        """
-        Optionally restricts the returned purchases to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
-        queryset = Project.objects.all()
-        username = self.request.query_params.get('username', None)
-        category = self.request.query_params.get('category', None)
-        if username is not None:
-            queryset = queryset.filter(owner__username=username)
-        if category is not None:
-            queryset = queryset.filter(category=category)
-        return queryset
-
-
+    queryset = Project.objects.all()
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['category', 'deadline', 'owner']
     # def get_queryset(self):
-    #     return Project.objects.all()  
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['Project'] = Project.objects.all().order_by('category')
-#         return context
+    #     queryset = Project.objects.all()
+    #     ...
+    #     category = self.request.query_params.get('category', None)
+    #     date_created = self.request.query_params.get('date_created', None)
+    #     ...
+    #     if category is not None:
+    #         queryset = queryset.filter(category=category)
+    #     if date_created is not None:
+    #         queryset = queryset.filter(date_created=date_created)
+    #     return queryset
 
 class CategoryProject(generics.RetrieveAPIView):
     permission_classes = [isSuperUser]
-    
-    # queryset = Project.objects.all()
-    # serializer_class = CategoryProjectSerializer
-    # lookup_field = 'category'
-    # queryset = request.GET.get("category")
     queryset = Category.objects.all()
     serializer_class = CategoryProjectSerializer
     lookup_field = 'category'
-
-    # def get_queryset(self):
-    #     '''Return all projects.'''
-    #     qs = Project.objects.all()   
-    #     q = self.request.GET.get("category")
-    #     if q: 
-    #         qs = qs.filter(category=q)
-    #     return qs
-    
-# http://localhost:8000/news/filter/?cuisine_type=American
-
-
-# class Category(APIView):
-#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-#     queryset = Project.objects.all()
-#     serializer_class = ProjectSerializer
-
-#     def get_object(self, pk):
-#         try:
-#             return Project.objects.get(pk=pk)
-#         except Project.DoesNotExist:
-#             raise Http404
-
 
 class ProjectDetail(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
@@ -224,9 +189,9 @@ class PledgeDetail(APIView):
         except Pledge.DoesNotExist:
             raise Http404
 
-
 class ProjectTotals(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         projects = Project.objects.all()

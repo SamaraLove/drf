@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Project, Pledge, Category
 from django.utils import timezone
-# from django.db.models import Sum
 
 class CategorySerializer(serializers.Serializer):
     # queryset = Project.objects.all()
@@ -36,24 +35,6 @@ class ProjectSerializer(serializers.Serializer):
     def create(self, validated_data):
         return Project.objects.create(**validated_data)
 
-    # def get_progress_goal(self,obj):
-    #     queryset = Pledge.objects.all()
-    #     total = 0
-    #     for instance in queryset:
-    #         total += instance.amount
-    #     return total
-
-
-    # class Meta:
-    #     model = Project
-    
-    # def get_category(self,obj):
-    #     return obj.get_category_display()
-
-    # def get_vehicle_category(self,obj):
-    #     return obj.get_vehicle_category_display()
-        
-
 
 class CategoryProjectSerializer(CategorySerializer):
     project_categories = ProjectSerializer(many=True, read_only=True)
@@ -80,14 +61,12 @@ class PledgeSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-
-
 class ProjectDetailSerializer(ProjectSerializer):    
     pledge_total = serializers.SerializerMethodField(read_only=True)
 
     no_of_pledges = serializers.SerializerMethodField(read_only=True)
     biggest_contribution = serializers.SerializerMethodField(read_only=True)
-    
+    # progress_goal = serializers.SerializerMethodField(read_only=True)
     pledges = PledgeSerializer(many=True, read_only=True)
 
     def update(self, instance, validated_data):
@@ -111,12 +90,11 @@ class ProjectDetailSerializer(ProjectSerializer):
         return total
     
     def get_no_of_pledges(self, obj):
-        queryset = Pledge.objects.filter(project = obj.id)        
-        total = 0
-        for instance in queryset:
-            total += instance.amount
-            # print (total)
-        return total
+        pledges = Pledge.objects.filter(project = obj.id)
+        pledge_no = 0
+        for like_i in pledges:
+            pledge_no = pledge_no + 1
+        return pledge_no
 
     def get_biggest_contribution(self,obj):
         queryset = Pledge.objects.filter(project = obj.id)        
@@ -132,29 +110,39 @@ class ProjectDetailSerializer(ProjectSerializer):
                 # print(name)
         return amount
 
-class ProjectTotalSerializer(ProjectSerializer):
-    pledge_total = serializers.SerializerMethodField(read_only=True)
-    no_of_pledges = serializers.SerializerMethodField(read_only=True)
-    biggest_contributor= serializers.SerializerMethodField(read_only=True)
+    # def get_progress_goal(self, obj):
+    #     goal = obj.goal
+    #     print(goal)
+    #     # amount = Pledge.objects.filter(project = obj.pledge_total)
+    #     # Goal = Project.objects.filter(goal = obj.id)
 
-    def get_pledge_total(self, obj):
+    #     amount = obj.pledge_total
+    #     print(amount)
+    #     progress = float(amount / goal)
+    #     return progress
+
+class ProjectTotalSerializer(ProjectSerializer):
+    overall_pledge_total = serializers.SerializerMethodField(read_only=True)
+    overall_no_of_pledges = serializers.SerializerMethodField(read_only=True)
+    overall_biggest_contribution = serializers.SerializerMethodField(read_only=True)
+
+    def get_overall_pledge_total(self, obj):
         queryset = Pledge.objects.all()
-        queryset = Pledge.objects.filter(project = obj.id)   
         total = 0
         for instance in queryset:
             total += instance.amount
         return total
     
-    def get_no_of_pledges(self, obj):
-        queryset = Pledge.objects.all(project = obj.id)
+    def get_overall_no_of_pledges(self, obj):
+        queryset = Pledge.objects.all()
         total = 0
         for instance in queryset:
             total += instance.amount
             # print (total)
         return total
     
-    def get_biggest_contributor(self,obj):
-        queryset = Pledge.objects.all(project = obj.id)
+    def get_overall_biggest_contribution(self,obj):
+        queryset = Pledge.objects.all()
         amount = 0
         for instance in queryset:
             if amount > instance.amount or amount == instance.amount:

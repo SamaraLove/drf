@@ -8,7 +8,7 @@ class Category(models.Model):
     category = models.CharField(max_length=100,unique=True)
 
     def __str__(self):
-        return self.catergory
+        return self.category
 
 def get_deadline():
     return datetime.today() + timedelta(days=20)
