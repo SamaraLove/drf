@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied 
 
 class CustomUserList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         users = CustomUser.objects.all()
