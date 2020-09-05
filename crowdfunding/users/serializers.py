@@ -6,7 +6,7 @@ class ProfileSerializer(serializers.Serializer):
     created = serializers.DateTimeField()
     updated = serializers.DateTimeField()
     # profile_img = serializers.ImageField(required=False, allow_empty_file=True)
-    profile_img = serializers.ImageField(required=False, use_url=True)
+    profile_img = serializers.URLField(required=False)
     bio = serializers.CharField(required=False, max_length=500)
     location = serializers.CharField(required=False, max_length=30)
 
