@@ -54,8 +54,6 @@ class Project(models.Model):
     # vehicle_category = models.CharField(max_length=60, blank=True, default='No Category Assigned',choices=VehicleType_CHOICES,verbose_name="vehicle_category")
 
 
-
-
 class Pledge(models.Model):
     amount = models.IntegerField()
     comment = models.CharField(max_length=200)
