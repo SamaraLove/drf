@@ -9,7 +9,7 @@ class CustomUser(AbstractUser):
         return self.username
 
 class Profile(models.Model):
-    rating = models.IntegerField(blank=True)
+    # rating = models.IntegerField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     profile_img = models.URLField(default = "", max_length=400)

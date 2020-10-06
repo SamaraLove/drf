@@ -2,9 +2,9 @@ from rest_framework import serializers
 from .models import CustomUser, Profile
 
 class ProfileSerializer(serializers.Serializer):
-    rating = serializers.IntegerField()
-    created = serializers.DateTimeField()
-    updated = serializers.DateTimeField()
+    # rating = serializers.IntegerField(required=False)
+    created = serializers.DateTimeField(required=Fals)
+    updated = serializers.DateTimeField(required=Fals)
     # profile_img = serializers.ImageField(required=False, allow_empty_file=True)
     profile_img = serializers.URLField(required=False)
     bio = serializers.CharField(required=False, max_length=500)
@@ -53,10 +53,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'updated',
             userprofile.updated
         )
-        userprofile.rating = userprofile_data.get(
-            'rating',
-            userprofile.rating
-        )
+        # userprofile.rating = userprofile_data.get(
+        #     'rating',
+        #     userprofile.rating
+        # )
         userprofile.profile_img = userprofile_data.get(
             'profile_img',
             userprofile.profile_img
