@@ -3,8 +3,8 @@ from .models import CustomUser, Profile
 
 class ProfileSerializer(serializers.Serializer):
     # rating = serializers.IntegerField(required=False)
-    created = serializers.DateTimeField(required=Fals)
-    updated = serializers.DateTimeField(required=Fals)
+    created = serializers.DateTimeField(required=False)
+    updated = serializers.DateTimeField(required=False)
     # profile_img = serializers.ImageField(required=False, allow_empty_file=True)
     profile_img = serializers.URLField(required=False)
     bio = serializers.CharField(required=False, max_length=500)
