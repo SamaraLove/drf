@@ -18,7 +18,7 @@ class Project(models.Model):
     description = models.TextField()
     goal = models.IntegerField()
     image = models.URLField()
-    # is_open = models.BooleanField()
+    is_open = models.BooleanField(default=True)
     date_created = models.DateTimeField(auto_now_add=True,editable=False)
     last_update_at = models.DateTimeField(auto_now=True,blank=True)
     deadline = models.DateField(default=get_deadline)
