@@ -20,8 +20,10 @@ class CustomUserList(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors)
-
+        return Response (
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 class CustomUserDetail(APIView):
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly,isSuperUser]
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
